@@ -1,5 +1,19 @@
 # Flutter JSON
 
+> Daftar Isi:
+>
+> 1. [Pendahuluan](#pendahuluan)
+> 2. [Manual Serialization](#manual-serialization)
+>    1. [Serializing Json Inline](#1-serializing-json-inline)
+>    2. [Serializing JSON di dalam class model](#2-serializing-json-di-dalam-class-model)
+> 3. [Serialization using Code Generator](#serialization-using-code-generator)
+>    1. [Setup json_serializable dalam project](#setup-json_serializable-dalam-project)
+>    2. [Membuat class model dengan json_serializable](#membuat-class-model-dengan-json_serializable)
+>    3. [Running code generator](#running-code-generator)
+>    4. [Mengkonsumsi model dari json_serializable](#mengkonsumsi-model-dari-json_serializable)
+
+## Pendahuluan
+
 JSON (JavaScript Object Notation) adalah format pertukaran data yang ringan. Sangat mudah bagi manusia untuk membaca dan menulisnya. Mudah bagi mesin untuk memprosesnya dan membuatnya. Format ini didasarkan pada Standar Bahasa Pemrograman JavaScript ECMA-262 Edisi ke-3 - Desember 1999. JSON adalah format teks yang sepenuhnya terbebas dari bahasa pemrograman apapun, akan tetapi dalam prakteknya json ini menggunakan konvensi yang akrab dengan bahasa pemrograman dari keluarga bahasa C, termasuk C, C++, C#, Java, JavaScript, Perl, Python, dan masih banyak lainnya. Kemudahan dan keunggulannya ini menjadikan JSON sebagai bahasa pertukaran data yang ideal dan terkenal untuk saat ini.
 
 ![Gambar 1. Struktur JSON dibandingkan List/Array pada umumnya](img/01%20struktur%20json.PNG)
@@ -143,11 +157,44 @@ Jalankan `flutter pub get` ke dalam folder root kita untuk membuat dependensi ba
 
 ```yaml
 dependencies:
-  json_annotation:
+  json_annotation: ^4.8.1
 
 dev_dependencies:
-  lints:
-  test:
-  build_runner:
-  json_serializable:
+  ...
+  build_runner: ^2.4.7
+  json_serializable: ^6.7.1
 ```
+
+### Membuat class model dengan json_serializable
+
+Berikut ini menunjukkan bagaimana cara mengkonversi class User menjadi class json_serializable. Kode berikut ini menggunakan model JSON yang disederhanakan dari contoh sebelumnya.
+
+![Gambar 5 Class Model dengan json_serializable](img/05%20class%20model%20dengan%20json_serializable.PNG)
+
+Gambar 5. Class Model dengan json_serializable
+
+Dengan setup ini, code generator menghasilkan kode untuk encoding dan decoding field name dan email dari JSON.
+
+Jika perlu, juga mudah untuk menyesuaikan strategi penamaan. Misalnya, jika API mengembalikan objek dengan snake_case, dan kita ingin menggunakan lowerCamelCase di model kita, kita bisa menggunakan anotasi @JsonKey dengan name parameter:
+
+![Gambar 06 Penggunaan JsonKey untuk formatting camelCase atau snake_case](img/06%20Penggunaan%20JsonKey%20untuk%20formatting%20camelCase%20atau%20snake_case.PNG)
+
+Gambar 6. Penggunaan `JsonKey` untuk formatting camelCase atau snake_case
+
+### Running code generator
+
+Saat membuat class `json_serializable` pertama kali, Anda akan mendapatkan kesalahan yang serupa dengan yang ditunjukkan pada gambar sebelumnya. Kesalahan ini sepenuhnya normal dan hanya karena kode yang dihasilkan untuk class model belum ada. Untuk mengatasinya, jalankan code generator untuk menghasilkan class boilerplate yang sudah terserialisasi.
+
+- Dengan menjalankan `dart run build_runner build --delete-conflicting-outputs` di root project, inimemicu build satu kali yang menelusuri files, memilih yang sesuai setup code generator, dan menghasilkan kode serialisasi.
+
+- Generate kode secara terus menerus. watcher membuat proses pembuatan kode kami lebih nyaman. Itu mengawasi perubahan dalam file project kita dan secara otomatis membuat file yang diperlukan. Memulai watcher dengan cara menjalankan perintah `dart run build_runner watch --delete-conflicting-outputs` di root project..
+
+![Gambar 7 Menjalankan code generator dengan perintah dart run](img/07%20Menjalankan%20code%20generator%20dengan%20perintah%20dart%20run.PNG)
+
+Gambar 7 Menjalankan code generator dengan perintah `dart run`
+
+### Mengkonsumsi model dari json_serializable
+
+Untuk decode JSON string dengan cara `json_serializable`, Anda sebenarnya tidak perlu melakukan perubahan apapun pada kode yang pernah kita buat sebelumnya.
+
+# [Materi Selanjutnya: Flutter Networking](http.md)

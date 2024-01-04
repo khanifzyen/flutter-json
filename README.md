@@ -19,7 +19,7 @@ Materi Mata Kuliah Pemrograman Mobile | Teknik Informatika UNISNU Jepara | Akhma
 >    git checkout -b dev
 >    ```
 >
-> 6. Mulai praktek, selesai praktek lakukan commit dengan label sesuai materi yang dikerjakan. Untuk project folder, anda bisa buat di dalam folder flutter-json dengan nama project "project_flutter_json"
+> 6. Mulai praktek, selesai praktek lakukan commit dengan label sesuai materi yang dikerjakan. Untuk project folder, anda bisa buat di dalam folder flutter-json dengan memilih Dart > New project > Console Application > Nama project "project_dart_json"
 >
 >    ```bash
 >    git add .
