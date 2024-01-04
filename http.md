@@ -104,7 +104,7 @@ Sekarang, gunakan langkah-langkah berikut untuk memperbarui fungsi `fetchAlbum()
 
 Ubah respons body menjadi JSON Map dengan paket `dart:convert`. Jika server mengembalikan respons OK dengan kode status 200, konversi JSON map menjadi Album menggunakan metode factory fromJson().
 
-Jika server tidak mengembalikan respons OK dengan kode status 200, maka berikan exception.(Bahkan dalam kasus respons server "404 Tidak Ditemukan"). Jangan kembalikan null.
+Jika server tidak mengembalikan respons OK dengan kode status 200, maka berikan exception.(Bahkan dalam kasus respons server "404 Not Found"). Jangan kembalikan null.
 
 ```dart
 import 'package:http/http.dart' as http;
@@ -182,8 +182,70 @@ Gambar 11. Menampilkan data dari rest api
 
 ## Mengirim data ke internet
 
-## Convert response dari http.Response ke Album
+Sebagian besar aplikasi memerlukan pengiriman data melalui internet, dan kita dapat menggunakan package http. HTTP Method POST adalah salah satu metode yang ada dalam HTTP (Hypertext Transfer Protocol), yang digunakan untuk mengirim data dari aplikasi ke server. Dengan menggunakan package http, kita dapat mengirim data ke server dengan menggunakan HTTP Method POST.
+Berikut langkah langkahnya :
+
+Pertama tambahkan http package dan config internet permission di
+AndroidManifest.xml seperti pada bab http get.
+
+Setelah itu kita dapat menuliskan kode untuk mengirimkan judul album ke url api: https://jsonplaceholder.typicode.com/albums Dengan http.post seperti potongan kode dibawah:
+
+`network_manager.dart`
+
+```dart
+...
+  Future<http.Response> createAlbum(String title) async {
+    return http.post(
+      Uri.parse('https://jsonplaceholder.typicode.com/albums'),
+      headers: <String, String>{
+        'Content-Type': 'Application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'title': title,
+      }),
+    );
+  }
+...
+```
+
+Metode http.post() mengembalikan Future yang berisi Response.
+
+- `Future` adalah class core Dart untuk bekerja dengan operasi asinkron. Objek future mewakili potensi nilai atau kesalahan yang akan tersedia di masa mendatang.
+- class `http.Response` berisi data yang diterima dari panggilan http ketika berhasil.
+- Metode `createAlbum()` mengambil argument title lalu dikirim ke server untuk membuat Album.
+
+## Ubah http.Response ke Album
+
+Gunakan langkah-langkah berikut untuk memperbarui fungsi `createAlbum()` untuk mengembalikan `Future<Album>`
+
+- Jika server mengembalikan respons `CREATED` dengan kode status 201, konversi JSON map menjadi Album menggunakan metode `factory fromJson()`.
+- Jika server tidak mengembalikan respons `CREATED` dengan kode status 201, maka masukan ke exception. (Bahkan dalam kasus
+  respons server "404 Not Found".)
+
+```dart
+...
+  Future<Album> createAlbum(String title) async {
+    final response = await http.post(
+      Uri.parse('https://jsonplaceholder.typicode.com/albums'),
+      headers: <String, String>{
+        'Content-Type': 'Application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'title': title,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      return Album.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to create album');
+    }
+  }
+...
+```
 
 ## Mendapatkan title dari inputan user
+
+Selanjutnya, buat `TextField` untuk memasukkan `title` dan `ElevatedButton` untuk mengirim data ke server. Juga tentukan `TextEditingController` untuk membaca input pengguna dari `TextField`. Saat `ElevatedButton` ditekan, `futureAlbum` diset ke nilai yang dikembalikan oleh metode `createAlbum()`.
 
 ## Menampilkan response ke layar
