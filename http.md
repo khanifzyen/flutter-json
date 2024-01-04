@@ -49,15 +49,136 @@ Setelah itu kita add package http dengan cara `flutter pub add http` Jangan lupa
 <uses-permission android:name="android.permission.INTERNET"/>
 ```
 
+![Gambar 10 Menambahkan permission internet](img/10%20Menambahkan%20permission%20internet.PNG)
+
+Gambar 10. Menambahkan permission internet
+
+Pertama kita import dulu package http nya seperti pada baris pertama. Setelah itu kita dapat membuat `class NetworkManager` untuk menampung function http method yang akan kita gunakan. Disini saya mencontohkan membuat `function fetchAlbum()`.
+
+```dart
+import 'package:http/http.dart' as http;
+
+class NetworkManager {
+  Future<http.Response> fetchAlbum() {
+    return http.get(Uri.parse('https://jsonplaceholder.typicode.com/albums/1'));
+  }
+}
+```
+
+Metode `http.get()` mengembalikan Future yang berisi Response.
+
+- Future adalah class core Dart untuk bekerja dengan operasi async. Objek Future mewakili potensi nilai atau kesalahan yang akan tersedia di masa mendatang.
+- class `http.Response` berisi data yang diterima dari panggilan http yang berhasil.
+
 ## Konversi response menjadi object Dart
+
+Meskipun mudah untuk membuat request network, namu bekerja dengan Future<http.Response> yang mentah sangat tidak nyaman. Untuk membuat ini lebih mudah kita handle, yuk kita ubah `http.Response` menjadi object Dart dengan class json serialization seperti topik sebelumnya.
+
+Pertama, buat `class Album` yang berisi data hasil dari request API GET. Mengonversi JSON secara manual hanyalah salah satu opsi. Untuk informasi lebih dalam bisa kembali ke topic JSON Serialization. Hasil class Album dapat dilihat seperti pada kode berikut.
+
+```dart
+class Album {
+  final int userId;
+  final int id;
+  final String title;
+
+  Album({
+    required this.userId,
+    required this.id,
+    required this.title,
+  });
+
+  factory Album.fromJson(Map<String, dynamic> json) {
+    return Album(
+      userId: json['userId'],
+      id: json['id'],
+      title: json['title'],
+    );
+  }
+}
+```
 
 ## Ubah http.Response menjadi Album
 
+Sekarang, gunakan langkah-langkah berikut untuk memperbarui fungsi `fetchAlbum()` untuk mengembalikan `Future<Album>`
+
+Ubah respons body menjadi JSON Map dengan paket `dart:convert`. Jika server mengembalikan respons OK dengan kode status 200, konversi JSON map menjadi Album menggunakan metode factory fromJson().
+
+Jika server tidak mengembalikan respons OK dengan kode status 200, maka berikan exception.(Bahkan dalam kasus respons server "404 Tidak Ditemukan"). Jangan kembalikan null.
+
+```dart
+import 'package:http/http.dart' as http;
+import 'album.dart';
+import 'dart:convert';
+
+class NetworkManager {
+  Future<Album> fetchAlbum() async {
+    final response = await http
+        .get(Uri.parse('https://jsonplaceholder.typicode.com/albums/1'));
+
+    if (response.statusCode == 200) {
+      return Album.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception("Failed to load Album");
+    }
+  }
+}
+```
+
 ## Ambil Data
+
+Panggil metode `fetchAlbum()` di dalam metode `initState()`.
+Metode `initState()` dipanggil hanya sekali dalam siklus stateful widget ketika widget ini dipanggil.
+
+```dart
+...
+class _MyHomePageState extends State<MyHomePage> {
+  late Future<Album> album;
+
+  @override
+  void initState() {
+    super.initState();
+    album = NetworkManager().fetchAlbum();
+  }
+...
+```
 
 ## Tampilkan Data
 
+Untuk menampilkan data di layar, gunakan widget `FutureBuilder`. Widget `FutureBuilder` memudahkan untuk bekerja dengan sumber data async. Anda harus menyediakan dua parameter:
+
+- Future yang ingin Anda kerjakan. Dalam hal ini, future dikembalikan dari fungsi `fetchAlbum()`.
+- `builder` function memberi tahu Flutter apa yang harus dirender, bergantung pada status dari future: loading, success, atau error.
+
+Perhatikan bahwa `snapshot.hasData` hanya mengembalikan true saat `snapshot` berisi nilai data bukan null. Karena `fetchAlbum` hanya dapat mengembalikan nilai non-null, fungsi tersebut harus mengarahkan exception ketika terjadi error.
+
+```dart
+...
+      body: FutureBuilder(
+        future: album,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Center(child: Text(snapshot.data!.title));
+          } else if (snapshot.hasError) {
+            return Text('${snapshot.error}');
+          }
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      ),
+...
+```
+
 ## Mengapa fetchAlbum() dipanggil di initState()
+
+Meskipun aman, tidak disarankan untuk melakukan panggilan API dalam metode `build()`. Flutter memanggil metode `build()` setiap kali perlu mengubah apa pun dalam tampilan, dan ini sering terjadi secara mengejutkan. Metode `fetchAlbum()`, jika ditempatkan di dalam `build()`, berulang setiap kali dipanggil pada setiap rebuild yang menyebabkan aplikasi melambat.
+
+Menyimpan hasil `fetchAlbum()` dalam variabel status memastikan bahwa future dijalankan hanya sekali dan kemudian di-cache untuk rebuild selanjutnya. Hasil app ketika dirunning akan seperti dibawah. Ini data sudah ambil dari REST API.
+
+![Gambar 11 menampilkan data dari rest api](img/11%20menampilkan%20data%20dari%20rest%20api.png)
+
+Gambar 11. Menampilkan data dari rest api
 
 ## Mengirim data ke internet
 
