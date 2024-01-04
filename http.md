@@ -25,13 +25,29 @@ Sebagai contoh kita akan mengambil data dari API URL: https://jsonplaceholder.ty
 
 Pertama yang perlu kita lakukan adalah mengecek dulu api ini di thunderclient, api ini berkerja dengan benar apa tidak.
 
+## Test API menggunakan Thunder Client
+
+Disini saya cek dulu url api nya di aplikasi thunder client untuk mendapatkan data dari api url yang sudah disiapkan oleh team backend. Untuk keterangannya sudah saya kasih angka:
+
+1. Klik New Request untuk membuat request api baru
+2. Method, contoh method GET
+3. Masukkan URL, tadi untuk contoh mengambil dari link typicode diatas
+4. Klik button SEND
+5. Response body berupa json format dengan status code, berhasil 200.
+
 ![Gambar 9 Request Pertama](img/09%20Request%20Pertama.PNG)
 
 Gambar 9. Request Pertama
 
-## Test API menggunakan POSTMAN
-
 ## Menambahkan package http
+
+Setelah kita tahu cek menggunakan postman dan normal, saatnya kita masuk ke kode flutter. Pertama kita buat dulu project nya dengan cara `flutter create project_rest_api`
+
+Setelah itu kita add package http dengan cara `flutter pub add http` Jangan lupa untuk menambahkan configurasi di yang berada difolder `android/app/src/main/Androidmanifest.xml`
+
+```xml
+<uses-permission android:name="android.permission.INTERNET"/>
+```
 
 ## Konversi response menjadi object Dart
 
